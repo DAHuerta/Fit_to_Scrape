@@ -1,0 +1,18 @@
+{{#each search}}
+<div class="story" id={{this.id}}>
+    <h2>
+        <a href="{{this.link}}" target="_blank">{{this.title}}</a>
+        <form action="/save/{{this._id}}" method="POST">
+        <button type="submit" class="status" value="{{this.status}}">{{this.status}}</button>
+        {{#unless this.comment}}
+        <button type="button" class="addComment" value="{{this._id}}">Add Comment</button>
+        {{/unless}}
+        {{#if this.comment}}
+        <button type="button" class="addComment" value="{{this._id}}">Edit Comment</button>
+        {{/if}}
+        </form>
+    </h2>
+    <summary>{{this.summary}}</summary>
+    <img src="{{this.image}}" alt="Article Image" class="image">
+</div>
+{{/each}}

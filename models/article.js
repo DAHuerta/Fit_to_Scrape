@@ -24,9 +24,24 @@ var articleSchema = new Schema;({
         required: true
     },
 
-    note: {
+    comment: {
         type: Schema.Types.ObjectId,
-        ref: "Note"
+        ref: "Comment"
+    },
+
+    saved: {
+        type: Boolean,
+        default: false
+    },
+
+    status: {
+        type: String,
+        default: "Saved Article"
+    },
+
+    created: {
+        type: Date,
+        default: Date.now
     }
 
 });

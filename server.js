@@ -25,8 +25,6 @@ app.set("view engine", "handlebars");
 
 mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
 
-require("./controllers/scrapeController.js")(app);
-
 app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
   });
