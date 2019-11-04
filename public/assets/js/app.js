@@ -4,5 +4,6 @@ function note(event) {
 
     var id = $(this).attr("value");
     
+    
 
 }
