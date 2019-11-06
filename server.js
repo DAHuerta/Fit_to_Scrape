@@ -31,7 +31,7 @@ app.listen(PORT, function() {
 
 app.get("/", function(req, res) {
 
-  Article.find({}, null, { sort: { created: -1} }, function(err, data) {
+  db.Article.find({}, null, { sort: { created: -1} }, function(err, data) {
     if(data.length === 0) {
       res.render("placeholder", { message: "There's nothing scraped yet!" });
     } else {
@@ -58,7 +58,7 @@ app.get("/scrape", function(req, res) {
       });
 
       var entry = new Article(result);
-      Article.find({ title: title }, function(err, data) {
+      db.Article.find({ title: title }, function(err, data) {
         if (data.length === 0) {
           entry.save(function(err, data) {
             if (err) throw err
@@ -75,7 +75,7 @@ app.get("/scrape", function(req, res) {
 
 app.get("/saved", function(req, res) {
 
-  Article.find({ isSaved: true }, null, { sort: { created: -1 } }, function(err, data) {
+  db.Article.find({ isSaved: true }, null, { sort: { created: -1 } }, function(err, data) {
     if(data.length === 0) {
       res.render("placeholder", { message: "You have no articles saved!"});
     } else {
@@ -87,7 +87,7 @@ app.get("/saved", function(req, res) {
 
 app.get("/:id", function(req, res) {
 
-  Article.findById(req.params.id, function(err, data) {
+  db.Article.findById(req.params.id, function(err, data) {
     res.json(data);
   })
 
@@ -95,7 +95,7 @@ app.get("/:id", function(req, res) {
 
 app.post("/search", function(req, res) {
 
-  Article.find({ $text: { $search: req.body.search, $caseSensitive: false } }, null, { sort: { created: -1 } }, function(err, data) {
+  db.Article.find({ $text: { $search: req.body.search, $caseSensitive: false } }, null, { sort: { created: -1 } }, function(err, data) {
     if (data.length === 0) {
       res.render("placeholder", { message: "Nothing has been found" });
     } else {
@@ -107,7 +107,7 @@ app.post("/search", function(req, res) {
 
 app.post("/save/:id", function(req, res) {
 
-  Article.findById(req.params.id, function(err, data) {
+  db.Article.findById(req.params.id, function(err, data) {
     if(data.isSaved) {
       Article.findByIdAndUpdate(req.params.id, { $set: { isSaved: false, status: "Save Article" } }, { new: true }, function(err, data) {
         res.redirect("/");
@@ -121,12 +121,12 @@ app.post("/save/:id", function(req, res) {
 
 })
 
-app.post("/note:id", function(req, res) {
+app.post("/Comment:id", function(req, res) {
 
-  var note = new Note (req.body);
-  note.save(function(err, doc) {
+  var Comment = new Comment (req.body);
+  db.Comment.save(function(err, doc) {
     if (err) throw err;
-    Article.findByIdAndUpdate(req.params.id, { $set: { "note": doc._id } }, { new: true }, function(err, newdoc) {
+    db.Article.findByIdAndUpdate(req.params.id, { $set: { "Comment": doc._id } }, { new: true }, function(err, newdoc) {
       if (err) throw err;
       else {
         res.send(newdoc);
@@ -137,11 +137,11 @@ app.post("/note:id", function(req, res) {
 
 });
 
-app.get("/note/:id", function(req, res) {
+app.get("/Comment/:id", function(req, res) {
 
   var id = req.params.id;
-  Article.findById(id).populate("note").exec(function(err,data) {
-    res.send(data.note);
+  db.Article.findById(id).populate("Comment").exec(function(err,data) {
+    res.send(data.Comment);
   });
 
 });
