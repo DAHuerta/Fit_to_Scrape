@@ -12,7 +12,7 @@ var cheerio = require("cheerio");
 
 var db = require("./models");
 
-var PORT = 8080;
+var PORT = process.env.PORT || 8080;
 
 var app = express();
 
@@ -23,7 +23,7 @@ app.use(express.static("public"));
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
-mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localHost/scraper", {useNewUrlParser: true});
 
 app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
@@ -32,11 +32,11 @@ app.listen(PORT, function() {
 app.get("/", function(req, res) {
 
   db.Article.find({}, null, { sort: { created: -1} }, function(err, data) {
-    if(data.length === 0) {
-      res.render("placeholder", { message: "There's nothing scraped yet!" });
-    } else {
-      res.render("index", { articles: data });
-    }
+    // if(data.length === 0) {
+    //   res.render("placeholder", { message: "There's nothing scraped yet!" });
+    // } else {
+    // }
+    res.render("index", { articles: data });
   })
 
 })
@@ -45,33 +45,32 @@ app.get("/scrape", function(req, res) {
 
   axios.get("https://www.theonion.com").then(function(response) {
     var $ = cheerio.load(response.data);
-    var results = [];
     $("h1.sc-759qgu-0").each(function(i, element) {
-      var title = $(element).text();
-      var link = $(element).parent("a").attr("href");
-      var image = $(element).find(".sc-1xh12qx-2");
+      var title = $(this).text();
+      var link = $(this).parent("a").attr("href");
+      var image = $(this).find(".sc-1xh12qx-2");
 
-      results.push({
+      var result = {
         title: title,
         link: link,
         image: image
-      });
+      };
 
-      var entry = new Article(result);
-      db.Article.find({ title: title }, function(err, data) {
-        if (data.length === 0) {
-          entry.save(function(err, data) {
-            if (err) throw err
-          });
-        };
-      });
+      // console.log(result)
 
-    });
-    console.log("Scrape finished.");
-    screen.direct("/");
-  });
-
+      db.Article.create(result)
+        .then(function(dbArticle) {
+          console.log(dbArticle)
+        })
+          .catch(function(err) {
+            console.log(err)
+          })
+        });
+        console.log("Scrape finished.");
+        res.send("Scrape Complete!")
+        
 });
+})
 
 app.get("/saved", function(req, res) {
 
